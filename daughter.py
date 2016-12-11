@@ -1,6 +1,6 @@
 import discord
 import asyncio
-import markovify
+from markov import markovGen
 import random
 import pytz
 from datetime import datetime,timedelta
@@ -17,11 +17,6 @@ def rollDie(number):
 	
 lockoutChannelList = ['lewdzone', 'announcements','snakes-and-stones','robit-test-zone'] #Change or add the names of channels that you do NOT want the bot to auto-copy.
 
-with open("nagaarchive.txt") as f: #Change tweets.txt to your source file
-    text = f.read()
-
-text_model = markovify.NewlineText(text)
-
 client = discord.Client()
 
 @client.event
@@ -33,18 +28,9 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-	if '256830217740484608' in message.content:
+	if client.user.id in message.content:
 		if 'rant' in message.content:
-			markovchain = ""
-			for i in range(random.randint(1,3)):
-				while True:
-					try:
-						markovchain += text_model.make_sentence() + ' '
-						break
-					except TypeError:
-						print('Value error, retrying...')
-			#print(markovchain) #Debug.
-			await client.send_message(message.channel, markovchain)
+			await client.send_message(message.channel, markovGen('naga'))
 		if 'help' in message.content:
 			await client.send_message(message.channel, 'Here is a list of my core functions:' + '\n**Rant** - I will speak my mind.' + '\n**Time** - I will tell you the time as it is inside my workshop.' + '\n**rtd** - I will roll a 20-sided die for you (like I dont have anything better to do.)')
 		if 'time' in message.content:
