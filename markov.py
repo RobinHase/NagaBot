@@ -8,6 +8,8 @@ import random
 def markovGen(database, length=0):
 	if 'naga' in database:
 		database = 'nagaarchive.txt'
+	elif 'game' in database:
+		database = 'gamedescriptions.txt'
 	else:
 		database = 'nagaarchive.txt'
 	try:
