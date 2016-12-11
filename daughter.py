@@ -2,15 +2,22 @@ import discord
 import asyncio
 import markovify
 import random
-from datetime import datetime as dt
+import pytz
+from datetime import datetime,timedelta
+
 def suffix(d):
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 def custom_strftime(format, t):
     return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
 
+def rollDie(number):
+    for i in range(number):
+        roll = random.randint(1,20)
+    return roll
+	
 lockoutChannelList = ['lewdzone', 'announcements','snakes-and-stones','robit-test-zone'] #Change or add the names of channels that you do NOT want the bot to auto-copy.
 
-with open("messages.txt") as f: #Change tweets.txt to your source file
+with open("nagaarchive.txt") as f: #Change tweets.txt to your source file
     text = f.read()
 
 text_model = markovify.NewlineText(text)
@@ -39,9 +46,11 @@ async def on_message(message):
 			#print(markovchain) #Debug.
 			await client.send_message(message.channel, markovchain)
 		if 'help' in message.content:
-			await client.send_message(message.channel, 'Here is a list of my core functions:' + '\n**Rant** - I will speak my mind' + '\n**Time** - I will tell you the time as it is inside my workshop.')
+			await client.send_message(message.channel, 'Here is a list of my core functions:' + '\n**Rant** - I will speak my mind.' + '\n**Time** - I will tell you the time as it is inside my workshop.' + '\n**rtd** - I will roll a 20-sided die for you (like I dont have anything better to do.)')
 		if 'time' in message.content:
-			await client.send_message(message.channel, 'The current time is ' + dt.now().strftime("%I:%M %p") + ' on ' + custom_strftime("%B the {S}", dt.now()) + ', at least in my workshop. (Eastern Time)')
+			await client.send_message(message.channel, 'The current time is ' + datetime.now().strftime("%I:%M %p") + ' on ' + custom_strftime("%B the {S}", datetime.now()) + ', at least in my workshop (Eastern Time).')
+		if 'rtd' in message.content:
+			await client.send_message (message.channel, rollDie(1))
 		if 'archive' in message.content:
 			tmp = await client.send_message(message.channel, 'Tabulating...')
 			filename = message.author.name + ' ' + dt.now().strftime("%Y.%m.%d %H.%M.%S") + '.txt'
@@ -55,14 +64,14 @@ async def on_message(message):
 			await client.send_file(message.author, filename)
 	elif '137099198444208128' in message.author.id:
 		ignoreMessage = False
-		if 'https://' or 'http://' in message.content:
-			print('Link ignored.')
-			ignoreMessage = True
 		for i in lockoutChannelList:
 			if message.channel.name == i:
 				print('Message from channel ' + i + ' ignored.')
 				ignoreMessage = True
-		if ignoreMessage == False:
+		if ('https://' or 'http://') in message.content:
+			print('Link ignored.')
+			ignoreMessage = True
+		if ignoreMessage != True:
 			if len(message.clean_content) > 0:
 				nagaArchive = open('nagaarchive.txt', 'a+')
 				nagaArchive.write(message.clean_content + '\n')
